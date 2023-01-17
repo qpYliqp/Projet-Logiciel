@@ -37,17 +37,16 @@ public class ImageDao implements Dao<Image> {
   @Override
   public List<Image> retrieveAll() {
     ArrayList<Image> list = new ArrayList<Image>();
-    for(int i = 0 ; i < images.size() ; i++)
-    {
+    for (int i = 0; i < images.size(); i++) {
       list.add(images.get((long) i));
     }
-      
+
     return list;
   }
 
   @Override
   public void create(final Image img) {
-    this.images.put(img.getId(),img);
+    this.images.put(img.getId(), img);
   }
 
   @Override
@@ -58,5 +57,6 @@ public class ImageDao implements Dao<Image> {
   @Override
   public void delete(final Image img) {
     this.images.remove(img.getId());
+
   }
 }
