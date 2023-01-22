@@ -49,7 +49,7 @@ function ClickedButtonStyle(button : any){
   }
   else if(button.value == "0")
   {
-    button.style.color = "black";
+    button.style.color = "red";
   }
 
 }
@@ -62,6 +62,7 @@ galerie.onclick = function clicked()
   function GalerieClicked()
   {
 
+  document.getElementsByClassName("ErrorDiv")[0].firstChild?.remove();
   if(galerie.value == "0")
   {
     galerie.value = "1";
@@ -84,6 +85,7 @@ galerie.onclick = function clicked()
 
 function SelectionImage(event : any)
 {
+  document.getElementsByClassName("ErrorDiv")[0].firstChild?.remove();
   if(galerie.value == "1")
   {
       GalerieClicked(); 
@@ -146,12 +148,44 @@ function RemoveGalerie()
   if(box.getElementsByClassName("ImageStyle").length > 0)
   {
     console.log(box.getElementsByClassName("ImageStyle").length);
-    for(let i = 0; i <= box.getElementsByClassName("ImageStyle").length; i++)
+    var size = box.getElementsByClassName("ImageStyle").length;
+    for(let i = 0; i < size; i++)
     {
       console.log("id : "+box.getElementsByClassName("ImageStyle")[0]);
       box.getElementsByClassName("ImageStyle")[0].remove();
     }
   }
+}
+
+function Upload(event :any)
+{
+  document.getElementsByClassName("ErrorDiv")[0].firstChild?.remove();
+  var file = event.target.files[0];
+  event.target.name = "file";
+  let formData = new FormData();
+  formData.append("file", file);
+
+  axios.post( ImageURL,
+  formData,
+  {
+    headers: {
+        'Content-Type': 'multipart/form-data'
+    }
+  }
+).then(function(){
+  location.reload();
+  console.log('SUCCESS!!');
+})
+.catch(function(){
+  console.log('FAILURE!!');
+  var t =  document.createElement("p");
+  t.style.color = "red";
+  t.innerHTML = "Error, Only JPEG are allowed";
+  document.getElementsByClassName("ErrorDiv")[0].appendChild(t);
+});
+
+
+
 }
 
 
@@ -173,7 +207,11 @@ const count = ref(0)
   <div class="card">
     <h1 class="stp">{{ "BANKIMAGE.COM" }}</h1>
     <button type="button" @click="count++">count is {{ count }}</button>
-    <div class="SelectionImageDiv"></div>
+    <div class="ErrorDiv"></div>
+    <div class="SelectionImageDiv">
+        <input type="file" class="FileInput" v-on:change="Upload($event)" placeholder="Post Image On Server">
+
+    </div>
     <div class="ImageDiv"></div>
     <p>
       Edit
