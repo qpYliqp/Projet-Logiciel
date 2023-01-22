@@ -18,12 +18,16 @@ public class ImageDao implements Dao<Image> {
 
   public ImageDao() {
     // placez une image test.jpg dans le dossier "src/main/resources" du projet
-    final ClassPathResource imgFile = new ClassPathResource("test.jpg");
+    final ClassPathResource imgFile = new ClassPathResource("persona.jpg");
     byte[] fileContent;
     try {
       fileContent = Files.readAllBytes(imgFile.getFile().toPath());
-      Image img = new Image("logo.jpg", fileContent);
+      Image img = new Image("persona", fileContent);
       images.put(img.getId(), img);
+      ClassPathResource imgFile2 = new ClassPathResource("mf.jpg");
+      fileContent = Files.readAllBytes(imgFile2.getFile().toPath());
+      Image img2 = new Image("MFDOOM", fileContent);
+      images.put(img2.getId(), img2);
     } catch (final IOException e) {
       e.printStackTrace();
     }

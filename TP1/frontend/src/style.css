@@ -67,6 +67,17 @@ button:focus-visible {
   text-align: center;
 }
 
+.ImageDiv {
+  width : 1000px;
+  overflow: hidden;
+
+}
+
+.ImageDiv img {
+  width: 100%;
+  object-fit: contain;
+}
+
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;
