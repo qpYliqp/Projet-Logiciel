@@ -1,165 +1,67 @@
 <script setup lang="ts">
 
-import { ref } from 'vue'
+
+
+import { ref, VueElement } from 'vue'
+
 import { defineProps } from 'vue'
 import axios from 'axios'
+import { parserOptions } from '@vue/compiler-dom';
 
-//declare a variable null in vue.js
+
+//ref permet de garder les données en mémoire asychrones
+const ListImage = ref([{id : -1, name : "defaut"}]);
+const Option = ref("Defaut");
+const ImageSRC = ref("");
+const Galerie = ref(false);
+const DefautSelect = ref(true);
+
+//export default axios
+
+
+
 
 let ImageURL = 'http://localhost:4000/images';
-let selection = document.createElement("select");
-let galerie = document.createElement("button");
-let defaut = new Option("Defaut", "defaut");
-    defaut.setAttribute("selected", "selected");
-    selection.add(defaut);
- 
- function SelectCreate() { axios.get(ImageURL)
-  .then(response => {
-    
-    galerie.setAttribute("type", "button");
-    galerie.innerHTML = "Galerie";
-    galerie.value = "0";
-    
-    
 
-    
-    document.getElementsByClassName("SelectionImageDiv")[0].appendChild(selection);
-    document.getElementsByClassName("SelectionImageDiv")[0].appendChild(galerie);
-    
-  
-    for(let i= 0; i <= response.data.length; i++)
-    {
-      let opt = new Option(response.data[i].name, response.data[i].id);
-      selection.add(opt);
-    }
+ function InitImages()
+ {
+  axios.get(ImageURL)
+  .then(response =>
+   {
+      ListImage.value = response.data;
+      console.log(ListImage);
   })
-  .catch(error => {
-   
+  .catch(error => 
+  {
+    console.log(error);
   })
 }
 
-selection.onchange = function changer(event){
-  SelectionImage(event);
-};
-
-function ClickedButtonStyle(button : any){
-  if(button.value == "1")
-  {
-    button.style.color = "green";
-  }
-  else if(button.value == "0")
-  {
-    button.style.color = "red";
-  }
-
-}
-
-galerie.onclick = function clicked()
-{
-  GalerieClicked();
-
-}
-  function GalerieClicked()
-  {
-
-  document.getElementsByClassName("ErrorDiv")[0].firstChild?.remove();
-  if(galerie.value == "0")
-  {
-    galerie.value = "1";
-    if(defaut.selected == false)
-    {
-      defaut.selected = true;
-    }
-    ClickedButtonStyle(galerie);
-    DisplayGalerie();
-  }
-  else if(galerie.value == "1")
-  {
-    galerie.value = "0";
-    ClickedButtonStyle(galerie);
-    RemoveGalerie();
-  }
-  
-};
-
+InitImages();
 
 function SelectionImage(event : any)
 {
-  document.getElementsByClassName("ErrorDiv")[0].firstChild?.remove();
-  if(galerie.value == "1")
+  if(event.target.value == "Defaut")
   {
-      GalerieClicked(); 
-  }
-
-  if(event.target.value != "defaut")
-  {
-    let box = document.getElementsByClassName("ImageDiv")[0];
-    if(box.getElementsByClassName("ImageStyle").length == 0)
-    {
-      box.appendChild(SelectImage(event.target.value));
-    }
-    else
-    {
-     box.getElementsByClassName("ImageStyle")[0].setAttribute("src", ImageURL +"/" + event.target.value);
-    }
+    DefautSelect.value = true;
   }
   else
   {
-    let box = document.getElementsByClassName("ImageDiv")[0];
-    if(box.getElementsByClassName("ImageStyle").length > 0)
-    {
-      box.getElementsByClassName("ImageStyle")[0].remove();
-    }
-  
+    DefautSelect.value = false;
   }
+  SelectImage(event.target.value);
 }
 
 function SelectImage(index : any)
 {
-  
-  let img = document.createElement("img");
-  img.setAttribute("src", ImageURL +"/" + index);
-  img.className = "ImageStyle";
-  return img;
+  ImageSRC.value = ImageURL +"/" + index;
+ 
   
 }
 
-function DisplayGalerie()
-{
-     let box = document.getElementsByClassName("ImageDiv")[0];
-    if(box.getElementsByClassName("ImageStyle").length > 0)
-    {
-      box.getElementsByClassName("ImageStyle")[0].remove();
-    }
-
-    axios.get(ImageURL).then(response => {
-      for(let i = 0; i < response.data.length; i++)
-      {
-        console.log(response.data[i].id);
-        box.appendChild(SelectImage(response.data[i].id));
-      }
-    })
-}
-
-function RemoveGalerie()
-{
-  
-  let box = document.getElementsByClassName("ImageDiv")[0];
-  if(box.getElementsByClassName("ImageStyle").length > 0)
-  {
-    console.log(box.getElementsByClassName("ImageStyle").length);
-    var size = box.getElementsByClassName("ImageStyle").length;
-    for(let i = 0; i < size; i++)
-    {
-      console.log("id : "+box.getElementsByClassName("ImageStyle")[0]);
-      box.getElementsByClassName("ImageStyle")[0].remove();
-    }
-  }
-}
 
 function Upload(event :any)
 {
-  document.getElementsByClassName("ErrorDiv")[0].firstChild?.remove();
   var file = event.target.files[0];
   event.target.name = "file";
   let formData = new FormData();
@@ -173,7 +75,7 @@ function Upload(event :any)
     }
   }
 ).then(function(){
-  location.reload();
+  InitImages();
   console.log('SUCCESS!!');
 })
 .catch(function(){
@@ -183,23 +85,40 @@ function Upload(event :any)
   t.innerHTML = "Error, Only JPEG are allowed";
   document.getElementsByClassName("ErrorDiv")[0].appendChild(t);
 });
+}
 
 
 
+defineProps<{ msg: string }>()
+
+
+function GalerieDisplay()
+{
+  if(Galerie.value == true)
+  {
+    Galerie.value = false;
+  }
+  else
+  {
+    Galerie.value = true;
+    Option.value = "Defaut";
+    DefautSelect.value = true;
+  }
 }
 
 
 
 
-defineProps<{ msg: string }>()
-SelectCreate();
-
-
 const count = ref(0)
+
+
+//v-on:change="Upload($event)"
+
 </script>
 
 
 <template>
+
   <h1>{{ msg }}</h1>
 
 
@@ -209,7 +128,18 @@ const count = ref(0)
     <button type="button" @click="count++">count is {{ count }}</button>
     <div class="ErrorDiv"></div>
     <div class="SelectionImageDiv">
-        <input type="file" class="FileInput" v-on:change="Upload($event)" placeholder="Post Image On Server">
+      <button v-on:click="GalerieDisplay()">Galerie</button>
+        <input type="file" class="FileInput"  @change="Upload($event)" placeholder="Post Image On Server">
+        <select v-model="Option" v-on:change="SelectionImage($event)">
+          <option value="Defaut" v-bind:selected="DefautSelect">Defaut</option>
+          <option v-for="image in ListImage " v-bind:value="image.id">{{ image.name }}</option>
+        </select>
+      <div v-if="Galerie == false">
+        <img v-if="DefautSelect == false" v-bind:src="ImageSRC" alt="Image" class="ImageStyle">
+      </div>
+      <div v-if="Galerie == true" class="GalerieDiv">
+        <img v-for="image in ListImage" v-bind:src="ImageURL + '/' + image.id" alt="Image" class="ImageStyle">
+      </div>
 
     </div>
     <div class="ImageDiv"></div>
