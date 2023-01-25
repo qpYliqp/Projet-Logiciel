@@ -67,18 +67,65 @@ button:focus-visible {
   text-align: center;
 }
 
-.ImageDiv {
-  width : 1000px;
-  overflow: hidden;
+.ImageStyle {
+width : 100%;
+height : 100%;
 
 }
 
-.ImageDiv img {
-  width: 100%;
-  object-fit: contain;
+#FileInput{
+  display: none;
 }
 
+label {
+  display: inline-block;
+  padding: 0.5em 1em;
+  border-radius: 0.25em;
+  background-color: #1a1a1a;
+  color: #fff;
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
 
+label:hover {
+  background-color: #646cff;
+}
+
+.Galerie-isActive {
+ display: inline-block;
+  padding: 0.5em 1em;
+  border-radius: 0.25em;
+  background-color: #646cff;
+  color: #fff;
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.Galerie-isInactive {
+ display: inline-block;
+  padding: 0.5em 1em;
+  border-radius: 0.25em;
+  background-color: #1a1a1a;
+  color: #fff;
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.GalerieDiv
+{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+.SelectButton
+{
+ background-color: #1a1a1a;
+ color : white;
+ border-radius: 0.25em;
+ margin-left : 50px;
+}
 
 
 @media (prefers-color-scheme: light) {
