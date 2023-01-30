@@ -11,10 +11,10 @@ export default defineConfig({
       }
     }
   },
-    build: {
-      outDir: 'target/dist',
-      assetsDir: 'static'
-    }
+  build: {
+    outDir: 'target/dist',
+    assetsDir: 'static'
+  }
   
 })
 

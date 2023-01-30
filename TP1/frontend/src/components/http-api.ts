@@ -9,7 +9,7 @@ mais je n'arrivais pas à accéder aux fonctions et computed:
 C'est pour ça qu'en attendant je définis tout de manière impérative et gloables les variables
 
 */
-export let ImageURL = 'http://localhost:4000/images';
+export let ImageURL = 'http://localhost:8080/images';
 export const ListImage = ref([{id : -1, name : "defaut"}]);
 export const Option = ref("Defaut");
 export const ImageSRC = ref("");
@@ -45,6 +45,10 @@ export function SelectImage(index : any)
 
  export function SelectionImage(event : any)
  {
+  if(GalerieButton.value == true)
+  {
+    GalerieButton.value = false;
+  }
    ErrorMsg.value = {text : "" , bool : false}
    if(event.target.value == "Defaut")
    {
