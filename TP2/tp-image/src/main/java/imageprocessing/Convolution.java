@@ -108,25 +108,6 @@ public class Convolution {
    *__________________________________________Convolution_______________________________
    *______________________________________________________________________________________________
    */
-  
-  // public static void convolution(GrayU8 input, GrayU8 output, int[][] kernel)
-  // {
-  //   for(int y = 0; y < input.height; y++) {
-  //     for(int x = 0; x < input.width; x++) {
-  //       int somme = 0;
-  //       for(int i = -1; i <= 1; i++) {
-  //         for(int j = -1; j <= 1; j++) {
-  //           int u = x + i;
-  //           int v = y + j;
-  //           if(u >= 0 && u < input.width && v >= 0 && v < input.height) {
-  //             somme += input.get(u, v) * kernel[i ][j ];
-  //           }
-  //         }
-  //       }
-  //       output.set(x, y, somme );
-  //     }
-  //   }
-  // }
 
   public static void convolution(GrayU8 input, GrayU8 output, int[][] kernel)
   {
@@ -161,10 +142,65 @@ public class Convolution {
   
   /*______________________________________________________________________________________________
    *______________________________________________________________________________________________
-   *__________________________________________Gaussian_Filter_____________________________________
+   *__________________________________________gradientImageSobel__________________________________
    *______________________________________________________________________________________________
    */
+  public static void gradientImageSobel(GrayU8 input, GrayU8 output)
+  {
+    int mask1[][] = 
+    {
+      {-1,0,1},
+      {-2,0,2},
+      {-1,0,1}
+    };
+    int mask2[][] = 
+    {
+      {-1,-2,-1},
+      {0,0,0},
+      {1,2,1}
+    };
 
+    int Gx[][] = new int[input.height][input.width];
+    int Gy[][] = new int[input.height][input.width];
+    
+    int size = mask1.length;
+    int n = (size-1)/2;
+
+    for(int y = n; y < input.height - n; y++) {
+      for(int x = n; x < input.width - n; x++) {
+        
+        for(int i = y-n; i <= y+n; i++)
+        {
+          for(int j = x-n; j <= x+n; j++)
+          {
+              Gx[y][x] += input.get(j, i) * mask1[i-y+n][j-x+n];
+          }
+
+        }
+      }
+    }
+
+    for(int y = n; y < input.height - n; y++) {
+      for(int x = n; x < input.width - n; x++) {
+        
+        for(int i = y-n; i <= y+n; i++)
+        {
+          for(int j = x-n; j <= x+n; j++)
+          {
+              Gy[y][x] += input.get(j, i) * mask2[i-y+n][j-x+n];
+          }
+          
+        }
+      }
+    }
+
+    for(int y = 0; y < input.height; y++) {
+      for(int x = 0; x < input.width; x++) {
+        output.set(x, y, (int)Math.sqrt(Gx[y][x]*Gx[y][x] + Gy[y][x]*Gy[y][x]));
+      }
+    }
+  
+  }
 
   public static void main(final String[] args){
     // load image
@@ -220,8 +256,11 @@ public class Convolution {
     };
     // convolution(input, output, tab);
     //meanFilterSimple(input, output, 5);
+    //meanFilterWithBorders(input, output, 5, BorderType.NORMALIZED);
 
-    convolution(input, output, tab);
+    //convolution(input, output, tab);
+
+    gradientImageSobel(input, output);
 
     // save output image
     final String outputPath = args[1];
