@@ -219,6 +219,11 @@ public class Convolution {
     {2,6,8,6,2},
     {1,2,3,2,1}};
 
+    int test[][] = 
+    {{100,1554,2554},
+    {1552,0,1555},
+    {144,1500,1000}};
+
     int matrice[][] = {
       {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
       {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
@@ -260,7 +265,8 @@ public class Convolution {
 
     //convolution(input, output, tab);
 
-    gradientImageSobel(input, output);
+    //gradientImageSobel(input, output);
+    convolution(input, output, test);
 
     // save output image
     final String outputPath = args[1];
