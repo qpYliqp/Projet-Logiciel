@@ -270,19 +270,21 @@ public class GrayLevelProcessing {
 		/*
 		 * _________________________________________________________________
 		 * _________________________________________________________________
-		 * _________________Liste des tests sans BoofCV_____________________
+		 * _________________Fonctions :_____________________________________
 		 * _________________________________________________________________
 		 */
 		// histogram(input);
 		// extend_gray(input);
 		// dynamique_lineaire(input, 0, 255);
 		// dynamique_lineaire_lut(input, 0, 255);
-		histogram_threads(input, 5);
+		histogram_threads(input,12 );
+
+		//__________________________________________________________________
 
 		// save output image
 		final String outputPath = args[1];
-		/* POUR TESTER AVEC BOOFCV : */ //boof_histogram(input, outputPath);
-		/* Pour tester normalement : */ UtilImageIO.saveImage(input, outputPath);
+		/* POUR TESTER boof_histogram: */ //boof_histogram(input, outputPath);
+		/* Pour tester les autres fonctions : */ UtilImageIO.saveImage(input, outputPath);
 		// UtilImageIO.saveImage(adjusted, outputPath);
 		System.out.println("Image saved in: " + outputPath);
 	}

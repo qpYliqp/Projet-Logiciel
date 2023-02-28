@@ -1,11 +1,13 @@
 package imageprocessing;
 
 import boofcv.alg.filter.blur.GBlurImageOps;
+import boofcv.alg.filter.convolve.ConvolveImageNoBorder;
 import boofcv.alg.filter.convolve.GConvolveImageOps;
 import boofcv.io.image.UtilImageIO;
 import boofcv.struct.border.BorderType;
 import boofcv.struct.convolve.Kernel1D_S32;
 import boofcv.struct.convolve.Kernel2D_S32;
+import boofcv.struct.image.GrayI16;
 import boofcv.struct.image.GrayU8;
 //mvn exec:java '-Dexec.mainClass=imageprocessing.Convolution' '-Dexec.args=input_images/input.jpeg test.jpeg'
 
@@ -19,8 +21,10 @@ public class Convolution {
    *______________________________________________________________________________________________
    */
   public static void meanFilterSimple(GrayU8 input, GrayU8 output, int size) {
+    size = size/2;
     for(int y = 0; y < input.height; y++) {
       for(int x = 0; x < input.width; x++) {
+        int count =0;
         int somme = 0;
         for(int i = -size; i <= size; i++) {
           for(int j = -size; j <= size; j++) {
@@ -28,10 +32,11 @@ public class Convolution {
             int v = y + j;
             if(u >= 0 && u < input.width && v >= 0 && v < input.height) {
               somme += input.get(u, v);
+              count++;
             }
           }
         }
-        output.set(x, y, somme / ((2 * size + 1) * (2 * size + 1)));
+        output.set(x, y, somme / count);//((2 * size + 1) * (2 * size + 1)));
       }
     }
   }
@@ -50,6 +55,7 @@ public class Convolution {
       for(int x = 0; x < input.width; x++) 
       {
         int somme = 0;
+        int count =0;
         for(int i = -size; i <= size; i++)
         {
           for(int j = -size; j <= size; j++)
@@ -59,17 +65,18 @@ public class Convolution {
             if(u >= 0 && u < input.width && v >= 0 && v < input.height)
             {
               somme += input.get(u, v);
+              count++;
             }
             else
             {
               if(borderType == BorderType.EXTENDED){
                 if(u < 0)
                 {
-                  u = 0;
+                u = 0;
                 }              
                 else if(u >= input.width)
                 {
-                  //il faut mettre -1 car sinon on sort de l'image : "An exception occurred while executing the Java class. Requested pixel is out of bounds: 1920 0"
+                //il faut mettre -1 car sinon on sort de l'image : "An exception occurred while executing the Java class. Requested pixel is out of bounds: 1920 0"
                   u = input.width - 1;
                 }
                 if(v < 0)
@@ -81,25 +88,36 @@ public class Convolution {
                   v = input.height - 1;
                 }
                 somme += input.get(u, v);
+                count++;
               }
               else if(borderType == BorderType.REFLECT)
               {
-                somme += input.get(Math.abs(u), Math.abs(v));
+                u = Math.abs(u) % input.width;
+                v = Math.abs(v) % input.height;
+                somme += count * input.get(u, v);
               }
               else if(borderType == BorderType.SKIP)
               {
                 somme += 0;
               }
               else if(borderType == BorderType.NORMALIZED){
-                
-                
+              count++;
+              }
             }
           }
         }
-        output.set(x, y, somme / ((2 * size + 1) * (2 * size + 1)));
+        if(count == 0)
+        {
+          output.set(x, y, 0);
+        }
+        else
+        {
+          output.set(x, y, somme / count);
+        }
       }
-     }
     }
+    System.out.print("Temps d'execution : " + System.nanoTime() + "\n");
+
 
   }
 
@@ -201,6 +219,13 @@ public class Convolution {
     }
   
   }
+  
+  public static void convolutionBOOF(GrayU8 input, GrayI16 output, Kernel2D_S32 kernel)
+  {
+    
+    ConvolveImageNoBorder.convolve(kernel, input, output);
+
+  }
 
   public static void main(final String[] args){
     // load image
@@ -211,6 +236,12 @@ public class Convolution {
     final String inputPath = args[0];
     GrayU8 input = UtilImageIO.loadImage(inputPath, GrayU8.class);
     GrayU8 output = input.createSameShape();
+
+  /*______________________________________________________________________________________________
+   *______________________________________________________________________________________________
+   *__________________________________________Liste des matrices__________________________________
+   *______________________________________________________________________________________________
+   */
 
     int tab[][] = 
     {{1,2,3,2,1},
@@ -259,14 +290,20 @@ public class Convolution {
       {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
       {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
     };
+
+  /*______________________________________________________________________________________________
+   *______________________________________________________________________________________________
+   *__________________________________________Liste des fonctions_________________________________
+   *______________________________________________________________________________________________
+   */
     // convolution(input, output, tab);
     //meanFilterSimple(input, output, 5);
-    //meanFilterWithBorders(input, output, 5, BorderType.NORMALIZED);
+    //meanFilterWithBorders(input, output, 25, BorderType.REFLECT);
 
-    //convolution(input, output, tab);
+    //convolution(input, output, matrice);
 
-    //gradientImageSobel(input, output);
-    convolution(input, output, test);
+    gradientImageSobel(input, output);
+    //convolution(input, output, test);
 
     // save output image
     final String outputPath = args[1];
