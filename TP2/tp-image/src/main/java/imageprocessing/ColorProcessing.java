@@ -48,6 +48,39 @@ public class ColorProcessing {
         }
     }
 
+
+
+   /*_____________________________________________________________________________________________
+   *______________________________________________________________________________________________
+   *__________________________________________MeanFilterSimple____________________________________
+   *______________________________________________________________________________________________
+   */    
+  public static void meanFilterSimple(Planar<GrayU8> input, int size) {
+    size = size/2;
+    for(int y = 0; y < input.height; y++) {
+      for(int x = 0; x < input.width; x++) {
+        int count =0;
+        float somme = 0;
+        for(int i = -size; i <= size; i++) {
+          for(int j = -size; j <= size; j++) {
+            int u = x + i;
+            int v = y + j;
+            if(u >= 0 && u < input.width && v >= 0 && v < input.height) {
+              for(int b= 0; b < input.getNumBands(); b++) {
+                somme += input.getBand(b).get(u, v);
+                count++;
+              }
+              
+            }
+          }
+        }
+        for(int b = 0; b < input.getNumBands(); b++) {
+          input.getBand(b).set(x, y, (int)somme / count);
+        }
+        
+      }
+    }
+  }
    /*_____________________________________________________________________________________________
    *______________________________________________________________________________________________
    *__________________________________________convolutionColor____________________________________
@@ -124,7 +157,7 @@ public class ColorProcessing {
    *______________________________________________________________________________________________
    */
 
-    public static void imageToHsv(Planar<GrayU8> input)
+    public static void imageToHsv(Planar<GrayU8> input, int saturation)
     {
             for(int y = 0 ; y < input.height ; y++)
             {
@@ -135,18 +168,20 @@ public class ColorProcessing {
                     int b = input.getBand(2).get(x, y);
                     float[] hsv = new float[3];
                     rgbToHsv(r, g, b, hsv);
-                    System.out.print("h : " + hsv[0] + " s : " + hsv[1] + " v : " + hsv[2] + "\n");
-                    input.getBand(0).set(x, y, (int)hsv[0]);
-                    input.getBand(1).set(x, y, (int)hsv[1]);
-                    input.getBand(2).set(x, y, (int)hsv[2]);
+                    hsv[0] = saturation;
+                    int rgb[] = new int[3];
+                    hsvToRgb(hsv[0], hsv[1], hsv[2], rgb);
+                    input.getBand(0).set(x, y, rgb[0]);
+                    input.getBand(1).set(x, y, rgb[1]);
+                    input.getBand(2).set(x, y, rgb[2]);
                 }
             }
     }
 
-    // public static void imageToHsvBOOF(Planar<GrayU8> input)
-    // {
-    //         ColorHsv.rgbToHsv(input, null);
-    // }
+    public static void imageToHsvBOOF(Planar<GrayU8> input)
+    {
+            ColorHsv.rgbToHsv(input, null);
+    }
 
     public static void rgbToHsv(int r, int g, int b, float[] hsv)
     {
@@ -191,69 +226,54 @@ public class ColorProcessing {
    *______________________________________________________________________________________________
    */
 
-    void hsvToRgb(float h, float s, float v, int[] rgb)
+    public static void hsvToRgb(float h, float s, float v, int[] rgb)
     {
-        
-    }
-
-   /*_____________________________________________________________________________________________
-   *______________________________________________________________________________________________
-   *__________________________________________extension_dynamique_color___________________________
-   *______________________________________________________________________________________________
-   */
-
-    public static void extension_dynamique_color(Planar<GrayU8> input, int min, int max)
-    {
-        for(int y = 0; y < input.height ; y++)
+        int i;
+        float f, p, q, t;
+        if( s == 0 ) 
         {
-            for(int x = 0; x < input.width ; x++)
-            {
-                for(int b = 0; b < input.getNumBands(); b++)
-                {
-                    int val = input.getBand(b).get(x, y);
-                    int new_val = (int) (255.0 * (val - min) / (max - min));
-                    if(new_val > 255) new_val = 255;
-                    if(new_val < 0) new_val = 0;
-                    input.getBand(b).set(x, y, new_val);
-                }
-            }
+            rgb[0] = rgb[1] = rgb[2] = (int)v;
+            return;
         }
-    }
-
-
-    public static void histogram_color(Planar<GrayU8> input)
-    {
-        int[] histogram = new int[256];
-        for(int y = 0; y < input.height ; y++)
+        h /= 60;            
+        i = (int)Math.floor( h );
+        f = h - i;          
+        p = v * ( 1 - s );
+        q = v * ( 1 - s * f );
+        t = v * ( 1 - s * ( 1 - f ) );
+        switch( i ) 
         {
-            for(int x = 0; x < input.width ; x++)
-            {
-                for(int b = 0; b < input.getNumBands(); b++)
-                {
-                    int val = input.getBand(b).get(x, y);
-                    histogram[val]++;
-                }
-            }
-        }
-        int min = 0;
-        int max = 255;
-        for(int i = 0; i < 256; i++)
-        {
-            if(histogram[i] != 0)
-            {
-                min = i;
+            case 0:
+                rgb[0] = (int)v;
+                rgb[1] = (int)t;
+                rgb[2] = (int)p;
                 break;
-            }
-        }
-        for(int i = 255; i >= 0; i--)
-        {
-            if(histogram[i] != 0)
-            {
-                max = i;
+            case 1:
+                rgb[0] = (int)q;
+                rgb[1] = (int)v;
+                rgb[2] = (int)p;
                 break;
-            }
+            case 2:
+                rgb[0] = (int)p;
+                rgb[1] = (int)v;
+                rgb[2] = (int)t;
+                break;
+            case 3:
+                rgb[0] = (int)p;
+                rgb[1] = (int)q;
+                rgb[2] = (int)v;
+                break;
+            case 4:
+                rgb[0] = (int)t;
+                rgb[1] = (int)p;
+                rgb[2] = (int)v;
+                break;
+            default:        
+                rgb[0] = (int)v;
+                rgb[1] = (int)p;
+                rgb[2] = (int)q;
+                break;
         }
-        extension_dynamique_color(input, min, max);
     }
 
 
@@ -328,17 +348,16 @@ public class ColorProcessing {
 
        
 
+        //meanFilterSimple(image, 3);
         
-        //imageToHsv(image);
-        extension_dynamique_color(image, 5, 55);
         //brightnessColor(image, -50);
-        //histogram_color(image);
+        meanFilterSimple(image,3);
+        
 
 
         final String outputPath = args[1];
         
-
-        /*POUR UTILISER LE RESTE : */ UtilImageIO.saveImage(image, outputPath);
+        UtilImageIO.saveImage(image, outputPath);
 
 
     }

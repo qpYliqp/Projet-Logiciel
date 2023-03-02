@@ -36,7 +36,7 @@ public class Convolution {
             }
           }
         }
-        output.set(x, y, somme / count);//((2 * size + 1) * (2 * size + 1)));
+        output.set(x, y, somme / count);
       }
     }
   }
